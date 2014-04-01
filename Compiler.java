@@ -15,6 +15,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.HashSet;
 
 public class Compiler {
 	private char[] input;
@@ -23,6 +24,30 @@ public class Compiler {
 	private int numVal;
 	private String idVal;
 	private int lineCount;
+        private HashSet variables;
+        
+        private StringBuilder outputCode;
+        
+        /*************************************************************************
+        * genC()
+        */
+        private void genC(){
+            System.out.println("#include <stdio.h>\n");
+            System.out.println("int main(){");
+            
+            Object[] var = variables.toArray();
+            System.out.print("\tint ");
+            for (int i = 0; i < var.length; i++) {
+                System.out.print((String)var[i]);
+                    if (i != var.length-1)
+                        System.out.print(", ");
+            }
+            System.out.println(";");
+            
+            System.out.print(outputCode.toString());
+            
+            System.out.println("\treturn 0;\n}");
+        }
 
 	/**************************************************************************
 	 * compile()
@@ -36,6 +61,7 @@ public class Compiler {
 			System.out.print(token + " ");
 			nextToken();
 		}*/
+                genC();
 	}
 
 	/**************************************************************************
@@ -49,7 +75,10 @@ public class Compiler {
 		token = Symbol.EOF;
 		numVal = -255;
 		idVal = new String();
+                
 		lineCount = 0;
+                outputCode = new StringBuilder();
+                variables = new HashSet();
 	}
 
 	/**************************************************************************
@@ -123,6 +152,7 @@ public class Compiler {
 				else {
 					token = Symbol.ID;
 					idVal = new String(sb);
+                                        variables.add(idVal);
 				}
 
 			} else {
@@ -181,6 +211,7 @@ public class Compiler {
 	// ID ::= [Aa,Bb,..,Zz] {Aa,Bb,..,Zz}
 	private void id(){
 		if (token == Symbol.ID){
+                        outputCode.append(" " + idVal);
 			nextToken();
 		} else {
 			error("É esperado um identificador.");
@@ -190,6 +221,7 @@ public class Compiler {
 	//NUM ::= [0,1,..,9] {0,1,..,9}
 	private void num(){
 		if (token == Symbol.NUM){
+                        outputCode.append(" " + numVal);
 			nextToken();
 		} else {
 			error("É esperado um operando numérico.");
@@ -213,6 +245,7 @@ public class Compiler {
 	//EXPR2_ ::= * TERM EXPR2_ | VAZIO
 	private void expr2_(){
 		if (token == Symbol.MULT){
+                        outputCode.append(" *" );
 			nextToken();
 			term();
 			expr2_();
@@ -228,6 +261,7 @@ public class Compiler {
 	//EXPR1_ ::= + EXPR2 EXPR1_ | VAZIO
 	private void expr1_(){
 		if (token == Symbol.PLUS){
+                        outputCode.append(" +");
 			nextToken();
 			expr2();
 			expr1_();
@@ -242,11 +276,14 @@ public class Compiler {
 	
 	//ATTRIB_STMT ::= ID '=' EXPR1 ';'
 	private void attrib_stmt(){
+                outputCode.append("\t");
 		id();
 		if (token == Symbol.ASSIGN){
+                        outputCode.append(" =");
 			nextToken();
 			expr1();
 			if (token == Symbol.SEMICOLON){
+                                outputCode.append(";\n");
 				nextToken();
 			} else
 				error("É Esperado \';\' no final da expressão.");
@@ -258,15 +295,17 @@ public class Compiler {
 	//WRITE_STMT ::= 'write' '(' EXPR1 ')' ';'
 	private void write_stmt(){
 		if (token == Symbol.WRITE){
+                        outputCode.append("\tprintf(\"%d\\n\", ");
 			nextToken();
 			if (token == Symbol.LPAR){
 				nextToken();
 				expr1();
 				if (token == Symbol.RPAR){
 					nextToken();
-					if (token == Symbol.SEMICOLON)
+					if (token == Symbol.SEMICOLON){
+                                                outputCode.append(");\n");
 						nextToken();
-					else
+                                        }else
 						error("É esperado \';\' após a instrução \'write\'.");
 				} else 
 					error("É esperado \')\' junto da instrução \'write\'.");
