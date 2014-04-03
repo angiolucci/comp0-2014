@@ -2,7 +2,7 @@ Fase 2 do compilador 0 (2014)
 ============================
 * Análise léxica;
 * Análise sintática;
-* Geração de cófigo em C.
+* Geração de código em C.
 
 Como compilar:
 -------------
