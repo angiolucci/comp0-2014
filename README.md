@@ -30,7 +30,7 @@ Gramática:
  * EXPR2_	::= * TERM EXPR2_  | VAZIO
  * TERM		::= NUM | ID
  * NUM		::= ( 0|1|...|9 ) { 0,1,..,9 }
- * ID		::= ( Aa|Bb|..|Zz ) { Aa,Bb,..,Zz }
+ * ID		::= ( Aa|Bb|..|Zz ) { _, Aa,Bb,..,Zz }
 
 Authors
 -------

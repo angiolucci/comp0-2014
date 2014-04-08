@@ -1,7 +1,6 @@
-import java.io.BufferedReader;
-
 import ast.*;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -15,28 +14,6 @@ public class Compiler {
 	private String idVal;
 	private int lineCount;
 	private VarList variables;
-
-	/*************************************************************************
-	 * genC()
-	 * 
-	private void genC() {
-		System.out.println("#include <stdio.h>\n");
-		System.out.println("int main(){");
-
-		Object[] var = variables.toArray();
-		System.out.print("\tint ");
-		for (int i = 0; i < var.length; i++) {
-			System.out.print((String) var[i]);
-			if (i != var.length - 1)
-				System.out.print(", ");
-		}
-		System.out.println(";");
-
-		System.out.print(outputCode.toString());
-
-		System.out.println("\treturn 0;\n}");
-	}
-	*/
 
 	/**************************************************************************
 	 * compile()
@@ -125,7 +102,7 @@ public class Compiler {
 		else {
 			StringBuilder sb = new StringBuilder();
 
-			if (Character.isLetter(input[tokenPos]) || input[tokenPos] == '_') {
+			if (Character.isLetter(input[tokenPos])) {
 				while (tokenPos < input.length
 						&& (Character.isLetter(input[tokenPos])
 								|| input[tokenPos] == '_' || Character
@@ -199,7 +176,7 @@ public class Compiler {
 	 * Regras de produção
 	 ***********************************************************************/
 
-	// ID ::= (Aa,Bb,..,Zz) {Aa,Bb,..,Zz}
+	// ID ::= (Aa,Bb,..,Zz) {_, Aa,Bb,..,Zz}
 	private IdExpr id() {
 		IdExpr id = null;
 		if (token == Symbol.ID) {
