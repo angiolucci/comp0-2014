@@ -33,7 +33,7 @@ public class Program {
 		for (int i = 0; i < this.stmts.size(); i++)
 			this.stmts.get(i).genC(tabCounts);
 		
-		System.out.print("\treturn  0;\n}");
+		System.out.print("\treturn 0;\n}");
 		
 	}
 }

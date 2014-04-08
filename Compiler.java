@@ -6,7 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 public class Compiler {
 	private char[] input;
@@ -16,7 +15,6 @@ public class Compiler {
 	private String idVal;
 	private int lineCount;
 	private VarList variables;
-	private StringBuilder outputCode;
 
 	/*************************************************************************
 	 * genC()
@@ -69,7 +67,6 @@ public class Compiler {
 		idVal = new String();
 
 		lineCount = 0;
-		outputCode = new StringBuilder();
 		variables = new VarList();
 	}
 
@@ -179,6 +176,7 @@ public class Compiler {
 						break;
 					default:
 						token = Symbol.UNKNOW;
+						error("Caractere especial não aceito: \'" + input[tokenPos] + "\'");
 						// System.out.println("nextToken(): Símbolo não inválido: "
 						// + input[tokenPos]);
 					}
