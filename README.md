@@ -1,7 +1,7 @@
 Fase 3 do compilador 0 (2014)
 ============================
 * Análise léxica;
-* Análise sintática;
+* Análise sintática (com geração de árvore sintática);
 * Geração de código em C.
 
 Como compilar:

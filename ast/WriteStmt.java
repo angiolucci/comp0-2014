@@ -1,20 +1,19 @@
 package ast;
 
 public class WriteStmt extends Stmt{
-	private Expr expr;
+	private CompositeExpr expr;
 	
-	public WriteStmt(Expr expr){
-		this.expr = expr;
+	public WriteStmt(CompositeExpr compExpr){
+		this.expr = compExpr;
 	}
 
 	
 	public void genC(int tabs) {
 		
-		System.out.print("\n");
 		for (int i = 0; i < tabs; i++)
-			System.out.println("\t");
+			System.out.print("\t");
 			
-		System.out.print("printf(\"%d\\n\", ");
+		System.out.print("printf( \"%d\\n\", ");
 		this.expr.genC(tabs);
 		System.out.println(");");
 	}

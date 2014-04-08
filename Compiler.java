@@ -1,22 +1,11 @@
 import java.io.BufferedReader;
-/*
- * PROGRAM		::= STMT_LIST
- * STMT_LIST	::= { STMT }
- * STMT 		::=  WRITE_STMT | ATTRIB_STMT 
- * WRITE_STMT	::= 'write' '(' EXPR1 ')' ';'
- * ATTRIB_STMT	::= ID '=' EXPR1 ';'
- * EXPR1		::= EXPR2 EXPR1_
- * EXPR1_		::= + EXPR2 EXPR1_ | VAZIO
- * EXPR2		::= TERM EXPR2_
- * EXPR2_		::= * TERM EXPR2_  | VAZIO
- * TERM			::= NUM | ID
- * NUM			::= ( 0|1|...|9 ) { 0,1,..,9 }
- * ID			::= ( Aa|Bb|..|Zz ) { Aa,Bb,..,Zz }
- */
+
+import ast.*;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public class Compiler {
@@ -26,12 +15,12 @@ public class Compiler {
 	private int numVal;
 	private String idVal;
 	private int lineCount;
-	private HashSet<String> variables;
+	private VarList variables;
 	private StringBuilder outputCode;
 
 	/*************************************************************************
 	 * genC()
-	 */
+	 * 
 	private void genC() {
 		System.out.println("#include <stdio.h>\n");
 		System.out.println("int main(){");
@@ -49,20 +38,22 @@ public class Compiler {
 
 		System.out.println("\treturn 0;\n}");
 	}
+	*/
 
 	/**************************************************************************
 	 * compile()
 	 */
 	public void compile(char[] fileContent) {
 		this.input = fileContent;
+		Program p = null;
 
 		nextToken();
-		program();
+		p = program();
 		/*
 		 * while (token != Symbol.EOF) { System.out.print(token + " ");
 		 * nextToken(); }
 		 */
-		genC();
+		p.genC();
 	}
 
 	/**************************************************************************
@@ -79,7 +70,7 @@ public class Compiler {
 
 		lineCount = 0;
 		outputCode = new StringBuilder();
-		variables = new HashSet<String>();
+		variables = new VarList();
 	}
 
 	/**************************************************************************
@@ -210,102 +201,124 @@ public class Compiler {
 	 * Regras de produção
 	 ***********************************************************************/
 
-	// ID ::= [Aa,Bb,..,Zz] {Aa,Bb,..,Zz}
-	private void id() {
+	// ID ::= (Aa,Bb,..,Zz) {Aa,Bb,..,Zz}
+	private IdExpr id() {
+		IdExpr id = null;
 		if (token == Symbol.ID) {
-			outputCode.append(" " + idVal);
+			id = new IdExpr(idVal);
 			nextToken();
 		} else {
 			error("É esperado um identificador.");
 		}
+		
+		return id;
 	}
 
-	// NUM ::= [0,1,..,9] {0,1,..,9}
-	private void num() {
+	// NUM ::= (0,1,..,9) {0,1,..,9}
+	private NumberExpr num() {
+		NumberExpr num = null;
 		if (token == Symbol.NUM) {
-			outputCode.append(" " + numVal);
+			num = new NumberExpr(numVal); 
 			nextToken();
 		} else {
 			error("É esperado um operando numérico.");
 		}
+		
+		return num;
 	}
 
 	// TERM ::= NUM | ID
-	private void term() {
+	private TermExpr term() {
+		TermExpr term = null;
 		switch (token) {
 		case Symbol.NUM:
-			num();
+			term = num();
 			break;
 		case Symbol.ID:
-			id();
+			term = id();
 			break;
 		default:
 			error("É esperado um operando ou um identificador.");
 		}
+		return term;
 	}
 
 	// EXPR2_ ::= * TERM EXPR2_ | VAZIO
-	private void expr2_() {
+	private Expr2 expr2_() {
+		Expr2 ex2 = null;
 		if (token == Symbol.MULT) {
-			outputCode.append(" *");
+			ex2 = new Expr2();
 			nextToken();
-			term();
-			expr2_();
+			ex2.setLeft(term());
+			ex2.setRight(expr2_());
 		}
+		return ex2;
 	}
 
 	// EXPR2 ::= TERM EXPR2_
-	private void expr2() {
-		term();
-		expr2_();
+	private Expr2 expr2() {
+		Expr2 ex2 = new Expr2();
+		ex2.setLeft(term());
+		ex2.setRight(expr2_());
+		
+		return ex2;
 	}
 
 	// EXPR1_ ::= + EXPR2 EXPR1_ | VAZIO
-	private void expr1_() {
+	private Expr1 expr1_() {
+		Expr1 ex1 = null;
 		if (token == Symbol.PLUS) {
-			outputCode.append(" +");
+			ex1 = new Expr1();
 			nextToken();
-			expr2();
-			expr1_();
+			ex1.setLeft(expr2());
+			ex1.setRight(expr1_());
 		}
+		return ex1;
 	}
 
 	// EXPR1 ::= EXPR2 EXPR1_
-	private void expr1() {
-		expr2();
-		expr1_();
+	private Expr1 expr1() {
+		Expr1 ex1 = new Expr1();
+		ex1.setLeft(expr2());
+		ex1.setRight(expr1_());
+		return ex1;
 	}
 
 	// ATTRIB_STMT ::= ID '=' EXPR1 ';'
-	private void attrib_stmt() {
-		outputCode.append("\t");
-		id();
+	private AttribStmt attrib_stmt() {
+		AttribStmt as = null;
+		IdExpr id = null;
+		Expr1 ex1 = null;
+		
+		id = id();
 		if (token == Symbol.ASSIGN) {
-			outputCode.append(" =");
 			nextToken();
-			expr1();
+			ex1 = expr1();
 			if (token == Symbol.SEMICOLON) {
-				outputCode.append(";\n");
 				nextToken();
 			} else
 				error("É Esperado \';\' no final da expressão.");
 		} else {
 			error("É Esperado sinal de atribuição.");
 		}
+		as = new AttribStmt(id, ex1);
+		return as;
+		
 	}
 
 	// WRITE_STMT ::= 'write' '(' EXPR1 ')' ';'
-	private void write_stmt() {
+	private WriteStmt write_stmt() {
+		WriteStmt ws = null;
+		CompositeExpr ce = null;
+		
 		if (token == Symbol.WRITE) {
-			outputCode.append("\tprintf(\"%d\\n\", ");
 			nextToken();
 			if (token == Symbol.LPAR) {
 				nextToken();
-				expr1();
+				ce = expr1();
 				if (token == Symbol.RPAR) {
 					nextToken();
 					if (token == Symbol.SEMICOLON) {
-						outputCode.append(");\n");
 						nextToken();
 					} else
 						error("É esperado \';\' após a instrução \'write\'.");
@@ -315,31 +328,44 @@ public class Compiler {
 				error("É esperado \'(\' junto da instrução \'write\'.");
 		} else
 			error("É esperado a instrução \'write()\'.");
+		
+		ws = new WriteStmt(ce);
+		return ws;
 	}
 
 	// STMT ::=  WRITE_STMT | ATTRIB_STMT
-	private void stmt() {
+	private Stmt stmt() {
+		Stmt stmt = null;
 		/* while (token != Symbol.EOF) { */
 			if (token == Symbol.WRITE)
-				write_stmt();
+				stmt = write_stmt();
 			else if (token == Symbol.ID)
-				attrib_stmt();
+				stmt = attrib_stmt();
 			else
 				error("stmt(): É esperado atribuição de variável ou "
 						+ "instrução \'write\'");
+			return stmt;
 		/*} */
 	}
 	
 	// STMT_LIST ::= { STMT }
-	private void stmt_list(){
+	private ArrayList<Stmt> stmt_list(){
+		ArrayList<Stmt> stmts = new ArrayList<Stmt>();
 		while (token != Symbol.EOF){
-			stmt();
+			stmts.add(stmt());
 		}
+		return stmts;
 	}
 	
 	// PROGRAM	::= STMT_LIST
-	private void program(){
-		stmt_list();
+	private Program program(){
+		Program program = new Program();
+		program.setVarLists(this.variables);
+		ArrayList<Stmt> stms = stmt_list();
+		program.setStmts(stms);
+		
+		return program;
+		
 	}
 	
 	 

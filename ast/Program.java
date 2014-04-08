@@ -15,14 +15,25 @@ public class Program {
 		this.stmts.add(stmt);
 	}
 	
+	public void setVarLists(VarList vList){
+		this.vars = vList;
+	}
+	
+	public void setStmts( ArrayList<Stmt> stmtList){
+		this.stmts = stmtList;
+	}
+	
 	public void genC(){
 		int tabCounts = 1;
 		
 		System.out.println("#include <stdio.h>\n");
 		System.out.println("int main(){");
+		vars.genC(tabCounts);
 		
 		for (int i = 0; i < this.stmts.size(); i++)
 			this.stmts.get(i).genC(tabCounts);
+		
+		System.out.print("\treturn  0;\n}");
 		
 	}
 }

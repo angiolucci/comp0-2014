@@ -2,13 +2,12 @@ package ast;
 
 public class AttribStmt extends Stmt{
 	private IdExpr id;
-	private Expr expr;
+	private CompositeExpr expr;
 
 	public void genC(int tabs) {
 		
-		System.out.print("\n");
 		for (int i = 0; i < tabs; i++)
-			System.out.println("\t");
+			System.out.print("\t");
 			
 		this.id.genC(tabs);
 		System.out.print("= ");
@@ -17,7 +16,7 @@ public class AttribStmt extends Stmt{
 		System.out.println(";");
 	}
 	
-	public AttribStmt(IdExpr id, Expr expr){
+	public AttribStmt(IdExpr id, CompositeExpr expr){
 		this.id = id;
 		this.expr = expr;
 	}

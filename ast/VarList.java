@@ -1,26 +1,38 @@
 package ast;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 
 public class VarList {
-	private HashSet<IdExpr>  variables;
+	private ArrayList<IdExpr>  variables;
 	
 	public VarList(){
-		this.variables = new HashSet<IdExpr>();
+		this.variables = new ArrayList<IdExpr>();
 	}
 	
-	public VarList(HashSet<IdExpr> vars){
+	public VarList(ArrayList<IdExpr> vars){
 		this.variables = vars;
 	}
 	
 	public boolean add(IdExpr newVar){
-		return this.variables.add(newVar);
+		String varName = newVar.getName();
+		IdExpr idExpr = new IdExpr(newVar.getName());
+		boolean contains = false;
+		
+		for (int i = 0; i < this.variables.size() && contains == false; i++)
+			if (this.variables.get(i).getName().compareTo(varName) == 0)
+				contains = true;
+		
+		if (!contains)
+			this.variables.add(idExpr);
+		
+		return contains;
+		
 	}
 	
-	// Revisar, talvez não faça sentido!
-	public boolean contains(IdExpr newVar){
-		return this.variables.contains(newVar);
+	public boolean add(String nameVar){
+		return this.add(new IdExpr(nameVar));
 	}
+	
 	
 	public void genC(int tabs){
 		if (! this.variables.isEmpty()){
@@ -33,6 +45,9 @@ public class VarList {
 			for (int i = 0; i < temp.length; i++){
 				IdExpr tmpId = (IdExpr)temp[i];
 				tmpId.genC(tabs);
+				
+				if (i != temp.length - 1)
+					System.out.print(',');
 			}
 			System.out.println(";");
 		}

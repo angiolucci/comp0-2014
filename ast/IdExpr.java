@@ -1,6 +1,6 @@
 package ast;
 
-public class IdExpr extends Expr{
+public class IdExpr extends TermExpr{
 	private String name;
 	
 	public IdExpr(String name){
@@ -8,7 +8,7 @@ public class IdExpr extends Expr{
 	}
 	
 	public void genC(int tabs){
-		System.out.println(this.name + " ");;
+		System.out.print(this.name + " ");;
 	}
 	
 	public String getName(){
