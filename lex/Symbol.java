@@ -1,3 +1,4 @@
+package lex;
 public class Symbol {
 	public final static int
 		EOF = 0,

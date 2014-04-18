@@ -1,33 +1,21 @@
 import ast.*;
-
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
+import lex.Lexer;
+import lex.Symbol;
+import runtime.Runtime;
 
 public class Compiler {
-	private char[] input;
-	private int tokenPos;
-	private int token;
-	private int numVal;
-	private String idVal;
-	private int lineCount;
 	private VarList variables;
+	private Lexer lexer;
 
 	/**************************************************************************
 	 * compile()
 	 */
-	public void compile(char[] fileContent) {
-		this.input = fileContent;
+	public void compile() {
 		Program p = null;
 
-		nextToken();
+		lexer.nextToken();
 		p = program();
-		/*
-		 * while (token != Symbol.EOF) { System.out.print(token + " ");
-		 * nextToken(); }
-		 */
 		p.genC();
 	}
 
@@ -35,141 +23,9 @@ public class Compiler {
 	 * Compiler()
 	 */
 
-	public Compiler() {
-		input = null;
-		tokenPos = -1; // IMPORTANTE! nextToken()
-						// incrementa em +1 para acessar a posicão zero
-		token = Symbol.EOF;
-		numVal = -255;
-		idVal = new String();
-
-		lineCount = 0;
+	public Compiler(char[] fileContent) {
 		variables = new VarList();
-	}
-
-	/**************************************************************************
-	 * openFile()
-	 */
-	public char[] openFile(String fileName) {
-		BufferedReader br = null;
-		try {
-			br = new BufferedReader(new FileReader(fileName));
-		} catch (FileNotFoundException e) {
-			System.out.println("Arquivo " + fileName + " não encontrado!");
-			System.exit(-1);
-		}
-		char[] fileContent = null;
-		String lineReaden = new String();
-		String aux = new String();
-		try {
-			while ((lineReaden = br.readLine()) != null) {
-				aux += '\n' + lineReaden;
-			}
-			br.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		fileContent = aux.toCharArray();
-
-		// input = fileContent;
-		return fileContent;
-	}
-
-	/**************************************************************************
-	 * nextToken()
-	 */
-	private void nextToken() {
-
-		if (input == null) {
-			System.out.println("nextToken(): Erro ao tentar ler código-fonte!");
-			System.exit(-1);
-		}
-
-		tokenPos++;
-
-		while (tokenPos < input.length
-				&& (input[tokenPos] == ' ' || input[tokenPos] == '\n'
-						|| input[tokenPos] == '\t' || input[tokenPos] == '\r')) {
-
-			if (input[tokenPos] == '\n')
-				lineCount++;
-
-			tokenPos++;
-		}
-
-		if (tokenPos == input.length)
-			token = Symbol.EOF;
-		else {
-			StringBuilder sb = new StringBuilder();
-
-			if (Character.isLetter(input[tokenPos])) {
-				while (tokenPos < input.length
-						&& (Character.isLetter(input[tokenPos])
-								|| input[tokenPos] == '_' || Character
-									.isDigit(input[tokenPos]))) {
-
-					sb.append(input[tokenPos]);
-					tokenPos++;
-				} // while
-				tokenPos--;
-
-				if (sb.toString().equalsIgnoreCase("write"))
-					token = Symbol.WRITE;
-				else {
-					token = Symbol.ID;
-					idVal = new String(sb);
-					variables.add(idVal);
-				}
-
-			} else {
-				if (Character.isDigit(input[tokenPos])) {
-					while (tokenPos < input.length
-							&& Character.isDigit(input[tokenPos])) {
-						sb.append(input[tokenPos]);
-						tokenPos++;
-					}
-					tokenPos--;
-					token = Symbol.NUM;
-					numVal = Integer.parseInt(sb.toString());
-				} else {
-					switch (input[tokenPos]) {
-					case ';':
-						token = Symbol.SEMICOLON;
-						break;
-					case '(':
-						token = Symbol.LPAR;
-						break;
-					case ')':
-						token = Symbol.RPAR;
-						break;
-					case '+':
-						token = Symbol.PLUS;
-						break;
-					case '*':
-						token = Symbol.MULT;
-						break;
-					case '=':
-						token = Symbol.ASSIGN;
-						break;
-					default:
-						token = Symbol.UNKNOW;
-						error("Caractere especial não aceito: \'" + input[tokenPos] + "\'");
-						// System.out.println("nextToken(): Símbolo não inválido: "
-						// + input[tokenPos]);
-					}
-				}
-			}
-		}
-	} // nextToken()
-
-	/**************************************************************************
-	 * error()
-	 */
-	private void error(String message) {
-		System.out.println("**********************************");
-		System.out.println("ERRO na linha " + lineCount + ": ");
-		System.out.println(message);
-		System.exit(-1);
+		lexer = new Lexer(fileContent);
 	}
 
 	/***********************************************************************
@@ -179,24 +35,24 @@ public class Compiler {
 	// ID ::= (Aa,Bb,..,Zz) {_, Aa,Bb,..,Zz}
 	private IdExpr id() {
 		IdExpr id = null;
-		if (token == Symbol.ID) {
-			id = new IdExpr(idVal);
-			nextToken();
+		if (lexer.token() == Symbol.ID) {
+			id = new IdExpr(lexer.idVal());
+			lexer.nextToken();
 		} else {
-			error("É esperado um identificador.");
+			Runtime.error("É esperado um identificador.", lexer.getLineNumber());
 		}
-		
+		variables.add(id);
 		return id;
 	}
 
 	// NUM ::= (0,1,..,9) {0,1,..,9}
 	private NumberExpr num() {
 		NumberExpr num = null;
-		if (token == Symbol.NUM) {
-			num = new NumberExpr(numVal); 
-			nextToken();
+		if (lexer.token() == Symbol.NUM) {
+			num = new NumberExpr(lexer.numVal()); 
+			lexer.nextToken();
 		} else {
-			error("É esperado um operando numérico.");
+			Runtime.error("É esperado um operando numérico.", lexer.getLineNumber());
 		}
 		
 		return num;
@@ -205,7 +61,7 @@ public class Compiler {
 	// TERM ::= NUM | ID
 	private TermExpr term() {
 		TermExpr term = null;
-		switch (token) {
+		switch (lexer.token()) {
 		case Symbol.NUM:
 			term = num();
 			break;
@@ -213,7 +69,7 @@ public class Compiler {
 			term = id();
 			break;
 		default:
-			error("É esperado um operando ou um identificador.");
+			Runtime.error("É esperado um operando ou um identificador.", lexer.getLineNumber());
 		}
 		return term;
 	}
@@ -221,9 +77,9 @@ public class Compiler {
 	// EXPR2_ ::= * TERM EXPR2_ | VAZIO
 	private Expr2 expr2_() {
 		Expr2 ex2 = null;
-		if (token == Symbol.MULT) {
+		if (lexer.token() == Symbol.MULT) {
 			ex2 = new Expr2();
-			nextToken();
+			lexer.nextToken();
 			ex2.setLeft(term());
 			ex2.setRight(expr2_());
 		}
@@ -242,9 +98,9 @@ public class Compiler {
 	// EXPR1_ ::= + EXPR2 EXPR1_ | VAZIO
 	private Expr1 expr1_() {
 		Expr1 ex1 = null;
-		if (token == Symbol.PLUS) {
+		if (lexer.token() == Symbol.PLUS) {
 			ex1 = new Expr1();
-			nextToken();
+			lexer.nextToken();
 			ex1.setLeft(expr2());
 			ex1.setRight(expr1_());
 		}
@@ -266,15 +122,15 @@ public class Compiler {
 		Expr1 ex1 = null;
 		
 		id = id();
-		if (token == Symbol.ASSIGN) {
-			nextToken();
+		if (lexer.token() == Symbol.ASSIGN) {
+			lexer.nextToken();
 			ex1 = expr1();
-			if (token == Symbol.SEMICOLON) {
-				nextToken();
+			if (lexer.token() == Symbol.SEMICOLON) {
+				lexer.nextToken();
 			} else
-				error("É Esperado \';\' no final da expressão.");
+				Runtime.error("É Esperado \';\' no final da expressão.", lexer.getLineNumber());
 		} else {
-			error("É Esperado sinal de atribuição.");
+			Runtime.error("É Esperado sinal de atribuição.", lexer.getLineNumber());
 		}
 		as = new AttribStmt(id, ex1);
 		return as;
@@ -286,23 +142,23 @@ public class Compiler {
 		WriteStmt ws = null;
 		CompositeExpr ce = null;
 		
-		if (token == Symbol.WRITE) {
-			nextToken();
-			if (token == Symbol.LPAR) {
-				nextToken();
+		if (lexer.token() == Symbol.WRITE) {
+			lexer.nextToken();
+			if (lexer.token() == Symbol.LPAR) {
+				lexer.nextToken();
 				ce = expr1();
-				if (token == Symbol.RPAR) {
-					nextToken();
-					if (token == Symbol.SEMICOLON) {
-						nextToken();
+				if (lexer.token() == Symbol.RPAR) {
+					lexer.nextToken();
+					if (lexer.token() == Symbol.SEMICOLON) {
+						lexer.nextToken();
 					} else
-						error("É esperado \';\' após a instrução \'write\'.");
+						Runtime.error("É esperado \';\' após a instrução \'write\'.", lexer.getLineNumber());
 				} else
-					error("É esperado \')\' junto da instrução \'write\'.");
+					Runtime.error("É esperado \')\' junto da instrução \'write\'.", lexer.getLineNumber());
 			} else
-				error("É esperado \'(\' junto da instrução \'write\'.");
+				Runtime.error("É esperado \'(\' junto da instrução \'write\'.", lexer.getLineNumber());
 		} else
-			error("É esperado a instrução \'write()\'.");
+			Runtime.error("É esperado a instrução \'write()\'.", lexer.getLineNumber());
 		
 		ws = new WriteStmt(ce);
 		return ws;
@@ -311,14 +167,14 @@ public class Compiler {
 	// STMT ::=  WRITE_STMT | ATTRIB_STMT
 	private Stmt stmt() {
 		Stmt stmt = null;
-		/* while (token != Symbol.EOF) { */
-			if (token == Symbol.WRITE)
+		/* while (lexer.token() != Symbol.EOF) { */
+			if (lexer.token() == Symbol.WRITE)
 				stmt = write_stmt();
-			else if (token == Symbol.ID)
+			else if (lexer.token() == Symbol.ID)
 				stmt = attrib_stmt();
 			else
-				error("stmt(): É esperado atribuição de variável ou "
-						+ "instrução \'write\'");
+				Runtime.error("stmt(): É esperado atribuição de variável ou "
+						+ "instrução \'write\'", lexer.getLineNumber());
 			return stmt;
 		/*} */
 	}
@@ -326,7 +182,7 @@ public class Compiler {
 	// STMT_LIST ::= { STMT }
 	private ArrayList<Stmt> stmt_list(){
 		ArrayList<Stmt> stmts = new ArrayList<Stmt>();
-		while (token != Symbol.EOF){
+		while (lexer.token() != Symbol.EOF){
 			stmts.add(stmt());
 		}
 		return stmts;
