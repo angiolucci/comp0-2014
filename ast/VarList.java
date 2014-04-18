@@ -31,7 +31,9 @@ public class VarList {
 	public void genC(int tabs){
 		if (! this.variables.isEmpty()){
 			for (int i = 0; i < tabs; i++)
-				System.out.print("\tint ");
+				System.out.print("\t");
+			
+			System.out.print("int ");
 			
 			Object[] temp;
 			Collection<IdExpr> temp2 =  this.variables.values();
