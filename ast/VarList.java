@@ -1,35 +1,29 @@
 package ast;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 
 public class VarList {
-	private ArrayList<IdExpr>  variables;
+	private HashMap<String, IdExpr> variables;
 	
 	public VarList(){
-		this.variables = new ArrayList<IdExpr>();
+		this.variables = new HashMap<String, IdExpr>();
 	}
 	
-	public VarList(ArrayList<IdExpr> vars){
+	public VarList(HashMap<String, IdExpr> vars){
 		this.variables = vars;
 	}
 	
-	public boolean add(IdExpr newVar){
+	public IdExpr add(IdExpr newVar){
 		String varName = newVar.getName();
-		IdExpr idExpr = new IdExpr(newVar.getName());
-		boolean contains = false;
+		IdExpr idExpr = new IdExpr(varName);
 		
-		for (int i = 0; i < this.variables.size() && contains == false; i++)
-			if (this.variables.get(i).getName().compareTo(varName) == 0)
-				contains = true;
+		return this.variables.put(varName, idExpr);
 		
-		if (!contains)
-			this.variables.add(idExpr);
-		
-		return contains;
 		
 	}
 	
-	public boolean add(String nameVar){
+	public IdExpr add(String nameVar){
 		return this.add(new IdExpr(nameVar));
 	}
 	
@@ -40,7 +34,8 @@ public class VarList {
 				System.out.print("\tint ");
 			
 			Object[] temp;
-			temp = this.variables.toArray();
+			Collection<IdExpr> temp2 =  this.variables.values();
+			temp = temp2.toArray();
 			
 			for (int i = 0; i < temp.length; i++){
 				IdExpr tmpId = (IdExpr)temp[i];
