@@ -1,4 +1,4 @@
-Fase 3 do compilador 0 (2014)
+Fase 4 do compilador 0 (2014)
 ============================
 * Análise léxica;
 * Análise sintática (com geração de árvore sintática);
