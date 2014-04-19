@@ -7,8 +7,8 @@ public class IdExpr extends TermExpr{
 		this.name = name;
 	}
 	
-	public void genC(int tabs){
-		System.out.print(this.name + " ");;
+	public void genC(int tabs, StringBuilder code){
+		code.append(this.name + " ");;
 	}
 	
 	public String getName(){

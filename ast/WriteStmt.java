@@ -8,14 +8,14 @@ public class WriteStmt extends Stmt{
 	}
 
 	
-	public void genC(int tabs) {
+	public void genC(int tabs, StringBuilder code) {
 		
 		for (int i = 0; i < tabs; i++)
-			System.out.print("\t");
+			code.append("\t");
 			
-		System.out.print("printf( \"%d\\n\", ");
-		this.expr.genC(tabs);
-		System.out.println(");");
+		code.append("printf( \"%d\\n\", ");
+		this.expr.genC(tabs, code);
+		code.append(");\n");
 	}
 
 }

@@ -4,16 +4,16 @@ public class AttribStmt extends Stmt{
 	private IdExpr id;
 	private CompositeExpr expr;
 
-	public void genC(int tabs) {
+	public void genC(int tabs, StringBuilder code) {
 		
 		for (int i = 0; i < tabs; i++)
-			System.out.print("\t");
+			code.append("\t");
 			
-		this.id.genC(tabs);
-		System.out.print("= ");
-		this.expr.genC(tabs);
+		this.id.genC(tabs, code);
+		code.append("= ");
+		this.expr.genC(tabs, code);
 		
-		System.out.println(";");
+		code.append(";\n");
 	}
 	
 	public AttribStmt(IdExpr id, CompositeExpr expr){

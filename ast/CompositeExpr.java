@@ -4,7 +4,7 @@ public abstract class CompositeExpr extends Expr{
 	protected CompositeExpr leftExpr;
 	protected CompositeExpr rightExpr;
 	
-	public abstract void genC(int tabs);
+	public abstract void genC(int tabs, StringBuilder code);
 	
 	
 	public CompositeExpr(CompositeExpr left, CompositeExpr right){

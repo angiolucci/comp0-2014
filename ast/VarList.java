@@ -28,12 +28,12 @@ public class VarList {
 	}
 	
 	
-	public void genC(int tabs){
+	public void genC(int tabs, StringBuilder code){
 		if (! this.variables.isEmpty()){
 			for (int i = 0; i < tabs; i++)
-				System.out.print("\t");
+				code.append("\t");
 			
-			System.out.print("int ");
+			code.append("int ");
 			
 			Object[] temp;
 			Collection<IdExpr> temp2 =  this.variables.values();
@@ -41,12 +41,12 @@ public class VarList {
 			
 			for (int i = 0; i < temp.length; i++){
 				IdExpr tmpId = (IdExpr)temp[i];
-				tmpId.genC(tabs);
+				tmpId.genC(tabs, code);
 				
 				if (i != temp.length - 1)
-					System.out.print(',');
+					code.append(',');
 			}
-			System.out.println(";");
+			code.append(";\n");
 		}
 	}
 	

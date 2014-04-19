@@ -1,8 +1,7 @@
 import ast.*;
 import java.util.ArrayList;
-import lex.Lexer;
-import lex.Symbol;
-import runtime.Runtime;
+import lex.*;
+import runtime.CompilerRuntime;
 
 public class Compiler {
 	private VarList variables;
@@ -11,12 +10,12 @@ public class Compiler {
 	/**************************************************************************
 	 * compile()
 	 */
-	public void compile() {
+	public String compile() {
 		Program p = null;
-
 		lexer.nextToken();
 		p = program();
-		p.genC();
+		return p.genC();
+		
 	}
 
 	/**************************************************************************
@@ -39,7 +38,7 @@ public class Compiler {
 			id = new IdExpr(lexer.idVal());
 			lexer.nextToken();
 		} else {
-			Runtime.error("É esperado um identificador.", lexer.getLineNumber());
+			CompilerRuntime.error("É esperado um identificador.", lexer.getLineNumber());
 		}
 		variables.add(id);
 		return id;
@@ -52,7 +51,7 @@ public class Compiler {
 			num = new NumberExpr(lexer.numVal()); 
 			lexer.nextToken();
 		} else {
-			Runtime.error("É esperado um operando numérico.", lexer.getLineNumber());
+			CompilerRuntime.error("É esperado um operando numérico.", lexer.getLineNumber());
 		}
 		
 		return num;
@@ -69,7 +68,7 @@ public class Compiler {
 			term = id();
 			break;
 		default:
-			Runtime.error("É esperado um operando ou um identificador.", lexer.getLineNumber());
+			CompilerRuntime.error("É esperado um operando ou um identificador.", lexer.getLineNumber());
 		}
 		return term;
 	}
@@ -128,9 +127,9 @@ public class Compiler {
 			if (lexer.token() == Symbol.SEMICOLON) {
 				lexer.nextToken();
 			} else
-				Runtime.error("É Esperado \';\' no final da expressão.", lexer.getLineNumber());
+				CompilerRuntime.error("É Esperado \';\' no final da expressão.", lexer.getLineNumber());
 		} else {
-			Runtime.error("É Esperado sinal de atribuição.", lexer.getLineNumber());
+			CompilerRuntime.error("É Esperado sinal de atribuição.", lexer.getLineNumber());
 		}
 		as = new AttribStmt(id, ex1);
 		return as;
@@ -152,13 +151,13 @@ public class Compiler {
 					if (lexer.token() == Symbol.SEMICOLON) {
 						lexer.nextToken();
 					} else
-						Runtime.error("É esperado \';\' após a instrução \'write\'.", lexer.getLineNumber());
+						CompilerRuntime.error("É esperado \';\' após a instrução \'write\'.", lexer.getLineNumber());
 				} else
-					Runtime.error("É esperado \')\' junto da instrução \'write\'.", lexer.getLineNumber());
+					CompilerRuntime.error("É esperado \')\' junto da instrução \'write\'.", lexer.getLineNumber());
 			} else
-				Runtime.error("É esperado \'(\' junto da instrução \'write\'.", lexer.getLineNumber());
+				CompilerRuntime.error("É esperado \'(\' junto da instrução \'write\'.", lexer.getLineNumber());
 		} else
-			Runtime.error("É esperado a instrução \'write()\'.", lexer.getLineNumber());
+			CompilerRuntime.error("É esperado a instrução \'write()\'.", lexer.getLineNumber());
 		
 		ws = new WriteStmt(ce);
 		return ws;
@@ -173,7 +172,7 @@ public class Compiler {
 			else if (lexer.token() == Symbol.ID)
 				stmt = attrib_stmt();
 			else
-				Runtime.error("stmt(): É esperado atribuição de variável ou "
+				CompilerRuntime.error("stmt(): É esperado atribuição de variável ou "
 						+ "instrução \'write\'", lexer.getLineNumber());
 			return stmt;
 		/*} */

@@ -5,13 +5,13 @@ package ast;
 public class Expr1 extends CompositeExpr{
 
 	@Override
-	public void genC(int tabs) {
+	public void genC(int tabs, StringBuilder code) {
 		if (this.rightExpr == null)
-			this.leftExpr.genC(tabs);
+			this.leftExpr.genC(tabs, code);
 		else {
-			this.leftExpr.genC(tabs);
-			System.out.print("+ ");
-			this.rightExpr.genC(tabs);
+			this.leftExpr.genC(tabs, code);
+			code.append("+ ");
+			this.rightExpr.genC(tabs, code);
 		}
 	}
 }

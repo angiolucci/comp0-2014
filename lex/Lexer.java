@@ -1,6 +1,6 @@
 package lex;
 
-import runtime.Runtime;
+import runtime.CompilerRuntime;
 
 public class Lexer {
 	private char[] input;
@@ -117,7 +117,7 @@ public class Lexer {
 						break;
 					default:
 						token = Symbol.UNKNOW;
-						Runtime.error("Caractere especial não aceito: \'"
+						CompilerRuntime.error("Caractere especial não aceito: \'"
 								+ input[tokenPos] + "\'", lineCount);
 					}
 				}

@@ -3,8 +3,8 @@ package ast;
 public class OperExpr extends Expr{
 	private char operator;
 	
-	public void genC(int tabs){
-		System.out.print(this.operator + " ");
+	public void genC(int tabs, StringBuilder code){
+		code.append(this.operator + " ");
 	}
 	
 	public OperExpr(char op){

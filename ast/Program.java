@@ -23,17 +23,19 @@ public class Program {
 		this.stmts = stmtList;
 	}
 	
-	public void genC(){
+	public String genC(){
 		int tabCounts = 1;
+		StringBuilder code = new StringBuilder();
 		
-		System.out.println("#include <stdio.h>\n");
-		System.out.println("int main(){");
-		vars.genC(tabCounts);
+		code.append("#include <stdio.h>\n");
+		code.append("int main(){\n");
+		vars.genC(tabCounts, code);
 		
 		for (int i = 0; i < this.stmts.size(); i++)
-			this.stmts.get(i).genC(tabCounts);
+			this.stmts.get(i).genC(tabCounts, code);
 		
-		System.out.print("\treturn 0;\n}");
+		code.append("\treturn 0;\n}");
+		return new String(code);
 		
 	}
 }
