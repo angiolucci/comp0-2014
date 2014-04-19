@@ -60,7 +60,7 @@ public class Lexer {
 
 			tokenPos++;
 		}
-
+		
 		if (tokenPos == input.length)
 			token = Symbol.EOF;
 		else {
@@ -82,7 +82,6 @@ public class Lexer {
 				else {
 					token = Symbol.ID;
 					idVal = new String(sb);
-					//variables.add(idVal);
 				}
 
 			} else {
@@ -115,9 +114,18 @@ public class Lexer {
 					case '=':
 						token = Symbol.ASSIGN;
 						break;
+					case '#':
+						//System.out.println("Pos: " + tokenPos);
+						//System.out.println("Tam: " + input.length);
+						while (tokenPos < input.length && input[tokenPos] != '\n')
+								tokenPos++;
+						if (tokenPos == input.length)
+							tokenPos--;
+						this.nextToken();
+						break;
 					default:
 						token = Symbol.UNKNOW;
-						CompilerRuntime.error("Caractere especial não aceito: \'"
+						CompilerRuntime.analysisError("Caractere especial não aceito: \'"
 								+ input[tokenPos] + "\'", lineCount);
 					}
 				}

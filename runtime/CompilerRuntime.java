@@ -29,7 +29,9 @@ public class CompilerRuntime {
 			}
 			br.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("Falha ao tentar ler o arquivo:\n" + fileName);
+			System.out.println("\nDetalhes do erro:\n" + e.getMessage());
+			System.exit(-1);
 		}
 		fileContent = aux.toCharArray();
 
@@ -37,13 +39,13 @@ public class CompilerRuntime {
 	}
 
 	/**************************************************************************
-	 * error()
+	 * analysisError()
 	 */
-	public static void error(String message, int lineCount) {
+	public static void analysisError(String message, int lineCount) {
 		System.out.println("**********************************");
 		System.out.println("ERRO na linha " + lineCount + ": ");
 		System.out.println(message);
-		System.exit(-1);
+		System.exit(-2);
 	}
 
 	/**************************************************************************
@@ -73,6 +75,7 @@ public class CompilerRuntime {
 			System.out.print("Verifique se você possui os privilégios para escrita e se a unidade");
 			System.out.println(" de disco possui espaço livre disponível para efetuar a gravação.");
 			System.out.println("\nDetalhes do erro:\n" + e.getMessage());
+			System.exit(-3);
 		}
 	}
 }

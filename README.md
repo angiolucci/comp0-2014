@@ -30,6 +30,8 @@ Gramática:
  * NUM		::= ( 0|1|...|9 ) { 0,1,..,9 }
  * ID		::= ( Aa|Bb|..|Zz ) { _, Aa,Bb,..,Zz }
 
+Para fazer um comentário no código, utiliza o caractere `#`.
+
 Authors
 -------
 Vinícius A. Reis and Jonas M. dos Santos

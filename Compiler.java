@@ -15,7 +15,7 @@ public class Compiler {
 		lexer.nextToken();
 		p = program();
 		return p.genC();
-		
+
 	}
 
 	/**************************************************************************
@@ -38,7 +38,8 @@ public class Compiler {
 			id = new IdExpr(lexer.idVal());
 			lexer.nextToken();
 		} else {
-			CompilerRuntime.error("É esperado um identificador.", lexer.getLineNumber());
+			CompilerRuntime.analysisError("É esperado um identificador.",
+					lexer.getLineNumber());
 		}
 		variables.add(id);
 		return id;
@@ -48,12 +49,13 @@ public class Compiler {
 	private NumberExpr num() {
 		NumberExpr num = null;
 		if (lexer.token() == Symbol.NUM) {
-			num = new NumberExpr(lexer.numVal()); 
+			num = new NumberExpr(lexer.numVal());
 			lexer.nextToken();
 		} else {
-			CompilerRuntime.error("É esperado um operando numérico.", lexer.getLineNumber());
+			CompilerRuntime.analysisError("É esperado um operando numérico.",
+					lexer.getLineNumber());
 		}
-		
+
 		return num;
 	}
 
@@ -68,7 +70,9 @@ public class Compiler {
 			term = id();
 			break;
 		default:
-			CompilerRuntime.error("É esperado um operando ou um identificador.", lexer.getLineNumber());
+			CompilerRuntime.analysisError(
+					"É esperado um operando ou um identificador.",
+					lexer.getLineNumber());
 		}
 		return term;
 	}
@@ -90,7 +94,7 @@ public class Compiler {
 		Expr2 ex2 = new Expr2();
 		ex2.setLeft(term());
 		ex2.setRight(expr2_());
-		
+
 		return ex2;
 	}
 
@@ -119,7 +123,7 @@ public class Compiler {
 		AttribStmt as = null;
 		IdExpr id = null;
 		Expr1 ex1 = null;
-		
+
 		id = id();
 		if (lexer.token() == Symbol.ASSIGN) {
 			lexer.nextToken();
@@ -127,20 +131,23 @@ public class Compiler {
 			if (lexer.token() == Symbol.SEMICOLON) {
 				lexer.nextToken();
 			} else
-				CompilerRuntime.error("É Esperado \';\' no final da expressão.", lexer.getLineNumber());
+				CompilerRuntime.analysisError(
+						"É Esperado \';\' no final da expressão.",
+						lexer.getLineNumber());
 		} else {
-			CompilerRuntime.error("É Esperado sinal de atribuição.", lexer.getLineNumber());
+			CompilerRuntime.analysisError("É Esperado sinal de atribuição.",
+					lexer.getLineNumber());
 		}
 		as = new AttribStmt(id, ex1);
 		return as;
-		
+
 	}
 
 	// WRITE_STMT ::= 'write' '(' EXPR1 ')' ';'
 	private WriteStmt write_stmt() {
 		WriteStmt ws = null;
 		CompositeExpr ce = null;
-		
+
 		if (lexer.token() == Symbol.WRITE) {
 			lexer.nextToken();
 			if (lexer.token() == Symbol.LPAR) {
@@ -151,54 +158,60 @@ public class Compiler {
 					if (lexer.token() == Symbol.SEMICOLON) {
 						lexer.nextToken();
 					} else
-						CompilerRuntime.error("É esperado \';\' após a instrução \'write\'.", lexer.getLineNumber());
+						CompilerRuntime.analysisError(
+								"É esperado \';\' após a instrução \'write\'.",
+								lexer.getLineNumber());
 				} else
-					CompilerRuntime.error("É esperado \')\' junto da instrução \'write\'.", lexer.getLineNumber());
+					CompilerRuntime.analysisError(
+							"É esperado \')\' junto da instrução \'write\'.",
+							lexer.getLineNumber());
 			} else
-				CompilerRuntime.error("É esperado \'(\' junto da instrução \'write\'.", lexer.getLineNumber());
+				CompilerRuntime.analysisError(
+						"É esperado \'(\' junto da instrução \'write\'.",
+						lexer.getLineNumber());
 		} else
-			CompilerRuntime.error("É esperado a instrução \'write()\'.", lexer.getLineNumber());
-		
+			CompilerRuntime.analysisError(
+					"É esperado a instrução \'write()\'.",
+					lexer.getLineNumber());
+
 		ws = new WriteStmt(ce);
 		return ws;
 	}
 
-	// STMT ::=  WRITE_STMT | ATTRIB_STMT
+	// STMT ::= WRITE_STMT | ATTRIB_STMT
 	private Stmt stmt() {
 		Stmt stmt = null;
 		/* while (lexer.token() != Symbol.EOF) { */
-			if (lexer.token() == Symbol.WRITE)
-				stmt = write_stmt();
-			else if (lexer.token() == Symbol.ID)
-				stmt = attrib_stmt();
-			else
-				CompilerRuntime.error("stmt(): É esperado atribuição de variável ou "
-						+ "instrução \'write\'", lexer.getLineNumber());
-			return stmt;
-		/*} */
+		if (lexer.token() == Symbol.WRITE)
+			stmt = write_stmt();
+		else if (lexer.token() == Symbol.ID)
+			stmt = attrib_stmt();
+		else
+			CompilerRuntime.analysisError(
+					"stmt(): É esperado atribuição de variável ou "
+							+ "instrução \'write\'", lexer.getLineNumber());
+		return stmt;
+		/* } */
 	}
-	
+
 	// STMT_LIST ::= { STMT }
-	private ArrayList<Stmt> stmt_list(){
+	private ArrayList<Stmt> stmt_list() {
 		ArrayList<Stmt> stmts = new ArrayList<Stmt>();
-		while (lexer.token() != Symbol.EOF){
+		while (lexer.token() != Symbol.EOF) {
 			stmts.add(stmt());
 		}
 		return stmts;
 	}
-	
-	// PROGRAM	::= STMT_LIST
-	private Program program(){
+
+	// PROGRAM ::= STMT_LIST
+	private Program program() {
 		Program program = new Program();
 		program.setVarLists(this.variables);
 		ArrayList<Stmt> stms = stmt_list();
 		program.setStmts(stms);
-		
+
 		return program;
-		
+
 	}
-	
-	 
-	
-	
+
 }
