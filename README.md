@@ -6,16 +6,14 @@ Fase 4 do compilador 0 (2014)
 
 Como compilar:
 -------------
-`javac *.java`
+`javac Comp.java`
 
 Como executar:
 --------------
-`java Main [caminho para código fonte]`
+`java Comp < caminho para código fonte >`
 
-**ou**
-
-`java Main [caminho para código fonte] > output.c`
-
+Um código fonte com a extensão `.c` será gerado no mesmo diretório do
+código fonte original.
 
 Gramática:
 ----------
