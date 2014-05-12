@@ -115,12 +115,11 @@ public class Lexer {
 						token = Symbol.ASSIGN;
 						break;
 					case '#':
-						//System.out.println("Pos: " + tokenPos);
-						//System.out.println("Tam: " + input.length);
 						while (tokenPos < input.length && input[tokenPos] != '\n')
 								tokenPos++;
 						if (tokenPos == input.length)
 							tokenPos--;
+						lineCount++;
 						this.nextToken();
 						break;
 					default:
